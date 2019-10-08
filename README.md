@@ -7,17 +7,17 @@ pinned message.
 
 ## Current status
 
-[x] Boilerplate bot code
-[x] Basic models
-[x] Creating new Daily Standup Channels
-[ ] Creating the Admin interface
-[ ] Creating the web form on single use URLs 
-[ ] Allowing people to subscribe to the daily of a channel
-[ ] Allowing people to submit their report
-[ ] Sending daily reminders
-[ ] Updating and pinning the aggregated daily
-[ ] Clean up and testing
-[ ] Implementing a nice design
+- [x] Boilerplate bot code
+- [x] Basic models
+- [x] Creating new Daily Standup Channels
+- [ ] Creating the Admin interface
+- [ ] Creating the web form on single use URLs 
+- [ ] Allowing people to subscribe to the daily of a channel
+- [ ] Allowing people to submit their report
+- [ ] Sending daily reminders
+- [ ] Updating and pinning the aggregated daily
+- [ ] Clean up and testing
+- [ ] Implementing a nice design
 
 
 ## How to add the bot to your Discord server
