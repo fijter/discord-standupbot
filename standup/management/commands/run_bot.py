@@ -22,14 +22,24 @@ class Command(BaseCommand):
             print('-----------------------------------')
 
         @bot.command(name='newstandup')
-        async def newstandup(ctx):
+        async def newstandup(ctx, standup_type):
+            
+            try:
+                stype = models.StandupType.objects.get(command_name=standup_type)
+            except models.StandupType.DoesNotExist:
+                msg = 'Please provide a valid standup type as the argument of this function, your options are:\n\n'
+                msg += '\n'.join(['`%s` (%s)' % (s.command_name, s.name) for s in models.StandupType.objects.all()])
+                await ctx.author.send(msg)
+                await ctx.message.delete()
+                return 
+
             if not ctx.author.permissions_in(ctx.channel).manage_roles:
                 await ctx.author.send('Sorry, you have no permission to do this! Only users with the permission to manage roles for a given channel can do this.')
             else:
-                if models.StandupEvent.objects.create_from_discord(ctx.channel, ctx.author):
-                    await ctx.send('Daily startup initialized!')
+                if models.StandupEvent.objects.create_from_discord(stype, ctx.channel, ctx.author):
+                    await ctx.send('%s initialized for this channel!' % stype.name)
                 else:
-                    await ctx.send('This channel already has a daily standup, no new one was created.')
+                    await ctx.send('This channel already has a %s, no new one was created.' % stype.name)
 
 
             await ctx.message.delete()
