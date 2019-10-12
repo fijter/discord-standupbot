@@ -7,6 +7,7 @@ decorator==4.4.0
 discord==1.0.1
 discord.py==1.2.3
 Django==2.2.6
+django-ordered-model==3.3.0
 idna==2.8
 ipython==7.8.0
 ipython-genutils==0.2.0
