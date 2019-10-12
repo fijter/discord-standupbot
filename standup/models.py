@@ -73,6 +73,30 @@ class StandupEventManager(models.Manager):
 
         StandupEvent(channel=channel, standup_type=standup_type, created_by=user).save()
         return True
+    
+    def add_participant_from_discord(self, standup_type, discord_channel, discord_user, creating_discord_user):
+        '''
+        Add a Discord user to a Standup, creates the user if needed.
+        '''
+        user, _ = User.objects.get_or_create(discord_id=discord_user.id, defaults={'username': discord_user.id, 'first_name': discord_user.display_name, 'last_name': discord_user.discriminator})
+        creating_user, _ = User.objects.get_or_create(discord_id=creating_discord_user.id, defaults={'username': creating_discord_user.id, 'first_name': creating_discord_user.display_name, 'last_name': creating_discord_user.discriminator})
+        server, _ = Server.objects.get_or_create(discord_guild_id=discord_channel.guild.id, defaults={'name': discord_channel.guild.name})
+        channel, _ = Channel.objects.get_or_create(discord_channel_id=discord_channel.id, server=server, defaults={'name': discord_channel.name})
+        
+        qs = StandupEvent.objects.filter(channel=channel, standup_type=standup_type)
+
+        if not qs.exists():
+            return (False, 'No standup available for this channel with this name')
+
+        event = qs.first()
+
+        att, created = event.attending.get_or_create(user=user, defaults={'created_by': creating_user})
+        
+        if created:
+            return (True, None)
+        else:
+            return (False, 'Already in this standup!')
+
 
 
 class StandupEvent(models.Model):
