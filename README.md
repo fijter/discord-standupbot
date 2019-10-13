@@ -13,10 +13,11 @@ pinned message.
 - [x] Creating the Admin interface
 - [x] Allowing people to subscribe to the daily of a channel
 - [x] Support multiple standup types with different questions (configurable)
-- [ ] Creating the web form on single use URLs 
-- [ ] Allowing people to submit their report
-- [ ] Sending daily reminders
+- [x] Creating the web form on single use URLs 
+- [x] Allowing people to submit their report
+- [x] Sending daily reminders
 - [ ] Updating and pinning the aggregated daily
+- [ ] Historical overview of standups on webpage
 - [ ] Clean up and testing
 - [ ] Implementing a nice design
 
