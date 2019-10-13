@@ -15,7 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from . import views
 
 urlpatterns = [
+    path('form/<token>/', views.StandupFormView.as_view(), name='standup_form'),
+    path('form/<token>/done/', views.StandupFormCompleteView.as_view(), name='standup_form_complete'),
     path('admin/', admin.site.urls),
 ]

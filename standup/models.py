@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from ordered_model.models import OrderedModel
+from django.utils.crypto import get_random_string
+from django.urls import reverse
+from django.contrib.sites.models import Site
+from django.utils import timezone
 import datetime
 
 
@@ -41,6 +45,38 @@ class StandupType(models.Model):
     create_on_friday = models.BooleanField(default=True)
     create_on_saturday = models.BooleanField(default=False)
     create_on_sunday = models.BooleanField(default=False)
+
+    def in_timeslot(self):
+        now = timezone.localtime()
+        if self.create_new_event_at.hour != now.hour:
+            return False
+
+        wd = now.weekday()
+
+        if wd == 0:
+            if self.create_on_monday:
+                return True
+        elif wd == 1:
+            if self.create_on_tuesday:
+                return True
+        elif wd == 2:
+            if self.create_on_wednesday:
+                return True
+        elif wd == 3:
+            if self.create_on_thursday:
+                return True
+        elif wd == 4:
+            if self.create_on_friday:
+                return True
+        elif wd == 5:
+            if self.create_on_saturday:
+                return True
+        else:
+            if self.create_on_sunday:
+                return True
+
+        return False
+
 
     def __str__(self):
         return self.name
@@ -107,6 +143,30 @@ class StandupEvent(models.Model):
 
     objects = StandupEventManager()
 
+    def initiate(self):
+        '''
+        Initialize a daily standup if there's no one yet and if the conditions for creating one are met.
+        Returns True with the participant objects if it succeeded, False and None if there already was a event.
+        '''
+        today = timezone.localtime().date()
+        att_users = []
+        if not self.standup_type.in_timeslot():
+            return (False, 'Not in timeslot')
+
+        if not self.standups.filter(created_at__date=today).exists():
+            s = Standup(event=self)
+            s.save()
+
+            for att in self.attending.filter(active=True):
+                p = StandupParticipation(standup=s, user=att.user)
+                p.save()
+                att_users.append(p)
+
+            return (True, att_users)
+
+        return (False, 'A standup for today already exists')
+
+
     def __str__(self):
         return '%s -> %s' % (self.channel, self.standup_type)
 
@@ -114,12 +174,13 @@ class StandupEvent(models.Model):
 class Attendee(models.Model):
     standup = models.ForeignKey('StandupEvent', on_delete=models.PROTECT, related_name='attending')
     user = models.ForeignKey('User', on_delete=models.PROTECT, related_name='attending')
+    active = models.BooleanField(default=True)
     created_by = models.ForeignKey('User', on_delete=models.PROTECT, related_name='created_attendees')
     created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Standup(models.Model):
-    event = models.ForeignKey('StandupEvent', on_delete=models.PROTECT, related_name='dailies')
+    event = models.ForeignKey('StandupEvent', on_delete=models.PROTECT, related_name='standups')
     created_at = models.DateTimeField(auto_now_add=True)
     pinned_message_id = models.IntegerField(null=True, blank=True)
 
@@ -130,16 +191,29 @@ class Standup(models.Model):
 class StandupParticipation(models.Model):
     standup = models.ForeignKey('Standup', on_delete=models.PROTECT, related_name='participants')
     user = models.ForeignKey('User', on_delete=models.PROTECT, related_name='participations')
+    single_use_token = models.CharField(max_length=255, blank=True, null=True)
+    completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_full_url(self):
+        current_site = Site.objects.get_current().domain
+        return 'https://%s%s' % (current_site, reverse('standup_form', kwargs={'token': self.single_use_token}))
+
+    def save(self, *args, **kwargs):
+        if not self.single_use_token:
+            self.single_use_token = get_random_string(length=48)
+
+        super(StandupParticipation, self).save(*args, **kwargs)
     
     def __str__(self):
         return '%s -> %s#%s' % (self.standup, self.user.first_name, self.user.last_name)
     
 
 class StandupParticipationAnswer(models.Model):
-    participation = models.ForeignKey('StandupParticipation', on_delete=models.PROTECT, related_name='answers')
+    participation = models.ForeignKey('StandupParticipation', on_delete=models.CASCADE, related_name='answers')
     question = models.ForeignKey('StandupQuestion', on_delete=models.PROTECT, related_name='answers')
     answer = models.TextField(blank=True)
 
     class Meta:
         unique_together = (('participation', 'question'),)
+

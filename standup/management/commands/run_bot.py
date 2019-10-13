@@ -91,11 +91,26 @@ class Command(BaseCommand):
 
 	    
         async def interval():
-            await asyncio.sleep(3)
+            await asyncio.sleep(10)
     
             while True:
                 # Repetitive task checks here
-                await asyncio.sleep(3)
+                for ev in models.StandupEvent.objects.all():
+                    success, to_notify = ev.initiate()
+                    if success:
+                        for participant in to_notify:
+                            did = int(participant.user.discord_id)
+                            user = bot.get_user(did)
+                            try:
+                                await user.send('Please answer the questions for "%s" in "%s" here: %s - Thanks!' % (
+                                    participant.standup.event.standup_type.name, 
+                                    participant.standup.event.channel, 
+                                    participant.get_full_url(),))
+                            except Exception as e:
+                                print('Something went wrong while sending form to the user: %s' % e)
+                                
+
+                await asyncio.sleep(10)
 
         try:
             bot.loop.run_until_complete(asyncio.gather(bot.start(settings.DISCORD_TOKEN), interval()))
