@@ -108,6 +108,32 @@ class Command(BaseCommand):
                                     participant.get_full_url(),))
                             except Exception as e:
                                 print('Something went wrong while sending form to the user: %s' % e)
+
+                for standup in models.Standup.objects.filter(rebuild_message=True):
+
+                    msg = '** %s - %s **\n\n' % (standup.event.standup_type.name, standup.created_at.date())
+
+                    for parti in standup.participants.filter(completed=True).order_by('user__first_name'):
+                        msg += '<@%s>\n\n' % parti.user.discord_id
+                        for answer in parti.answers.exclude(answer='').exclude(answer__isnull=True):
+                            msg += '**%s**\n%s\n\n' % (answer.question.question, answer.answer)
+                    
+                    channel_id = standup.event.channel.discord_channel_id
+                    channel = bot.get_channel(channel_id)
+
+                    if standup.pinned_message_id:
+                        # Edit existing
+                        msg_obj = await channel.fetch_message(standup.pinned_message_id)
+                        await msg_obj.edit(content=msg)
+                        standup.rebuild_message = False
+                        standup.save()
+                    else:
+                        # Create new and save message id
+                        msg_obj = await channel.send(msg)
+                        await msg_obj.pin()
+                        standup.pinned_message_id = msg_obj.id
+                        standup.rebuild_message = False
+                        standup.save()
                                 
 
                 await asyncio.sleep(10)
