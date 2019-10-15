@@ -118,7 +118,7 @@ class Command(BaseCommand):
                         for answer in parti.answers.exclude(answer='').exclude(answer__isnull=True):
                             msg += '**%s**\n%s\n\n' % (answer.question.question, answer.answer)
                     
-                    channel_id = standup.event.channel.discord_channel_id
+                    channel_id = int(standup.event.channel.discord_channel_id)
                     channel = bot.get_channel(channel_id)
 
                     if standup.pinned_message_id:
