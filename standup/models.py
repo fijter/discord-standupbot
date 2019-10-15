@@ -9,7 +9,7 @@ import datetime
 
 
 class User(AbstractUser):
-    discord_id = models.IntegerField(null=True, blank=True)
+    discord_id = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return '%s %s (%s)' % (self.first_name, self.last_name, self.discord_id)
@@ -17,7 +17,7 @@ class User(AbstractUser):
 
 class Server(models.Model):
     name = models.CharField(max_length=255)
-    discord_guild_id = models.BigIntegerField(unique=True)
+    discord_guild_id = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -27,7 +27,7 @@ class Server(models.Model):
 class Channel(models.Model):
     name = models.CharField(max_length=255)
     server = models.ForeignKey('Server', on_delete=models.CASCADE, related_name='channels')
-    discord_channel_id = models.BigIntegerField(unique=True)
+    discord_channel_id = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -182,7 +182,7 @@ class Attendee(models.Model):
 class Standup(models.Model):
     event = models.ForeignKey('StandupEvent', on_delete=models.PROTECT, related_name='standups')
     created_at = models.DateTimeField(auto_now_add=True)
-    pinned_message_id = models.BigIntegerField(null=True, blank=True)
+    pinned_message_id = models.CharField(max_length=255, null=True, blank=True)
     rebuild_message = models.BooleanField(default=False)
 
     def __str__(self):
