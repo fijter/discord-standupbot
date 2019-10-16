@@ -3,6 +3,7 @@ import asyncio
 from django.core.management.base import BaseCommand, CommandError
 from discord.ext.commands import Bot, MemberConverter, errors
 from django.conf import settings
+from django.utils import timezone
 from standup import models
 
 
@@ -92,6 +93,8 @@ class Command(BaseCommand):
 	    
         async def interval():
             await asyncio.sleep(10)
+
+            tz = timezone.get_default_timezone()
     
             while True:
                 # Repetitive task checks here
@@ -111,7 +114,7 @@ class Command(BaseCommand):
 
                 for standup in models.Standup.objects.filter(rebuild_message=True):
 
-                    msg = '** %s - %s **\n\n' % (standup.event.standup_type.name, standup.created_at.date())
+                    msg = '** %s - %s **\n\n' % (standup.event.standup_type.name, standup.created_at.astimezone(tz).date())
 
                     for parti in standup.participants.filter(completed=True).order_by('user__first_name'):
                         msg += '<@%s>\n\n' % parti.user.discord_id
