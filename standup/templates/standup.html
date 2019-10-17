@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}{% endblock %}
+{% block content %}
+<h1>{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}</h1>
+<h2>{{standup.event.standup_type.name}} - {{standup.created_at|date:"M d\t\h, Y"}}</h2>
+
+
+<div class="row">
+{% for parti in standup.participants.active %}
+    <div class="col-6">
+        <div class="participation">
+            <h3>{{parti.user.first_name}}</h3>
+            
+            {% for answer in parti.answers.all %}
+                <h4>{{answer.question}}</h4>
+                <p>
+                    {{answer.answer}}
+                </p>
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% endblock %}

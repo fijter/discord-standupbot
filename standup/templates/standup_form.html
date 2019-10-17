@@ -1,5 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}{% endblock %}
+{% block content %}
+<h1>{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}</h1>
+<h2>{{standup.event.standup_type.name}} - {{standup.created_at|date:"M d\t\h, Y"}}</h2>
+
 <form action="." method="POST">
+    <div class="form-group">
     {% csrf_token %}
     {{ form.as_p}}
-    <button type="submit">Submit</button>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
 </form>
+{% endblock %}

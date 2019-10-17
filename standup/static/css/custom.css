@@ -1,0 +1,40 @@
+body {
+    padding-top: 5rem;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.participation {
+    background: #eee;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.participation h3 {
+    background: black;
+    color: white;
+    margin: -20px;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.participation h4 {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+form {
+    margin: 40px 0;
+}
+
+form label {
+    display: block;
+}
+
+form textarea {
+    width: 100%;
+    display: block;
+    height: 120px;
+}

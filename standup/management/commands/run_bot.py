@@ -108,29 +108,20 @@ class Command(BaseCommand):
                                 await user.send('Please answer the questions for "%s" in "%s" here: %s - Thanks!' % (
                                     participant.standup.event.standup_type.name, 
                                     participant.standup.event.channel, 
-                                    participant.get_full_url(),))
+                                    participant.get_form_url(),))
+
+                                await user.send('You can check the results of this standup on %s' % (participant.get_private_url(),))
                             except Exception as e:
                                 print('Something went wrong while sending form to the user: %s' % e)
 
-                for standup in models.Standup.objects.filter(rebuild_message=True):
+                for standup in models.Standup.objects.filter(rebuild_message=True, event__standup_type__private=False):
 
-                    msg = '** %s - %s **\n\n' % (standup.event.standup_type.name, standup.created_at.astimezone(tz).date())
+                    msg = '** %s - %s **\n\n%s' % (standup.event.standup_type.name, standup.created_at.astimezone(tz).date(), standup.get_public_url())
 
-                    for parti in standup.participants.filter(completed=True).order_by('user__first_name'):
-                        msg += '<@%s>\n\n' % parti.user.discord_id
-                        for answer in parti.answers.exclude(answer='').exclude(answer__isnull=True):
-                            msg += '**%s**\n%s\n\n' % (answer.question.question, answer.answer)
-                    
                     channel_id = int(standup.event.channel.discord_channel_id)
                     channel = bot.get_channel(channel_id)
 
-                    if standup.pinned_message_id:
-                        # Edit existing
-                        msg_obj = await channel.fetch_message(standup.pinned_message_id)
-                        await msg_obj.edit(content=msg)
-                        standup.rebuild_message = False
-                        standup.save()
-                    else:
+                    if not standup.pinned_message_id:
                         # Create new and save message id
                         msg_obj = await channel.send(msg)
                         await msg_obj.pin()

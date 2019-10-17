@@ -1,10 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 from ordered_model.models import OrderedModel
 from django.utils.crypto import get_random_string
 from django.urls import reverse
 from django.contrib.sites.models import Site
 from django.utils import timezone
+from django.utils.text import slugify
 import datetime
 
 
@@ -17,8 +19,16 @@ class User(AbstractUser):
 
 class Server(models.Model):
     name = models.CharField(max_length=255)
+    slug = models.SlugField(null=True, blank=True, unique=True)
     discord_guild_id = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+
+        super(Server, self).save(*args, **kwargs)
+
 
     def __str__(self):
         return self.name
@@ -27,8 +37,15 @@ class Server(models.Model):
 class Channel(models.Model):
     name = models.CharField(max_length=255)
     server = models.ForeignKey('Server', on_delete=models.CASCADE, related_name='channels')
+    slug = models.SlugField(null=True, blank=True)
     discord_channel_id = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+
+        super(Channel, self).save(*args, **kwargs)
     
     def __str__(self):
         return '%s -> #%s' % (self.server.name, self.name)
@@ -45,6 +62,7 @@ class StandupType(models.Model):
     create_on_friday = models.BooleanField(default=True)
     create_on_saturday = models.BooleanField(default=False)
     create_on_sunday = models.BooleanField(default=False)
+    private = models.BooleanField(default=False, help_text='If enabled only participants of the standup can view the standup, the public URL will be disabled!')
 
     def in_timeslot(self):
         now = timezone.localtime()
@@ -184,9 +202,26 @@ class Standup(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     pinned_message_id = models.CharField(max_length=255, null=True, blank=True)
     rebuild_message = models.BooleanField(default=False)
+    
+    def get_public_url(self):
+        current_site = Site.objects.get_current().domain
+        tz = timezone.get_default_timezone()
+        cdate = self.created_at.astimezone(tz).date()
+
+        return 'https://%s%s' % (current_site, reverse('public_standup', kwargs={
+            'server': self.event.channel.server.slug, 
+            'channel': self.event.channel.slug, 
+            'standup_type': self.event.standup_type.command_name,
+            'date': str(cdate)}))
 
     def __str__(self):
         return '%s -> %s' % (self.event, self.created_at.date())
+
+
+class StandupParticipationManager(models.Manager):
+    
+    def active(self):
+        return self.filter(completed=True).order_by('user__first_name')
 
 
 class StandupParticipation(models.Model):
@@ -196,9 +231,15 @@ class StandupParticipation(models.Model):
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def get_full_url(self):
+    objects = StandupParticipationManager()
+
+    def get_form_url(self):
         current_site = Site.objects.get_current().domain
         return 'https://%s%s' % (current_site, reverse('standup_form', kwargs={'token': self.single_use_token}))
+
+    def get_private_url(self):
+        current_site = Site.objects.get_current().domain
+        return 'https://%s%s' % (current_site, reverse('private_standup', kwargs={'token': self.single_use_token}))
 
     def save(self, *args, **kwargs):
         if not self.single_use_token:

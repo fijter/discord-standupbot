@@ -14,7 +14,11 @@ class StandupFormView(FormView):
         return super(StandupFormView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse('standup_form_complete', kwargs={'token': self.kwargs.get('token')})
+        p = models.StandupParticipation.objects.get(single_use_token=self.kwargs.get('token'))
+        if p.standup.event.standup_type.private:
+            return p.get_private_url()
+        else:
+            return p.standup.get_public_url()
 
     def get_form_kwargs(self):
         kwargs = super(StandupFormView, self).get_form_kwargs()
@@ -24,7 +28,51 @@ class StandupFormView(FormView):
             raise Http404('Single use token not valid')
         kwargs['participation'] = p
         return kwargs
+    
+    def get_context_data(self, *args, **kwargs):
+        context = super(StandupFormView, self).get_context_data(**kwargs)
+        standup = models.Standup.objects.filter(
+            participants__single_use_token=self.kwargs['token']
+        ).first()
+
+        if not standup:
+            raise Http404('Standup not found!')
+        
+        context['standup'] = standup
+        return context
 
 
-class StandupFormCompleteView(TemplateView):
-    template_name = 'standup_form_complete.html'
+class PublicStandupView(TemplateView):
+    template_name = 'standup.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(PublicStandupView, self).get_context_data(**kwargs)
+        standup = models.Standup.objects.filter(
+            created_at__date=kwargs['date'], 
+            event__standup_type__private=False, 
+            event__channel__slug=kwargs['channel'], 
+            event__channel__server__slug=kwargs['server'],
+            event__standup_type__command_name=kwargs['standup_type']
+        ).first()
+
+        if not standup:
+            raise Http404('Standup not found!')
+        
+        context['standup'] = standup
+        return context
+
+
+class PrivateStandupView(TemplateView):
+    template_name = 'standup.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(PrivateStandupView, self).get_context_data(**kwargs)
+        standup = models.Standup.objects.filter(
+            participants__single_use_token=kwargs['token']
+        ).first()
+
+        if not standup:
+            raise Http404('Standup not found!')
+        
+        context['standup'] = standup
+        return context
