@@ -1,9 +1,9 @@
-# Discord Daily standup bot
+# Discord Standup bot
 
-This generic bot will allow you to enable asynchronous daily standups in Discord.
+This generic bot will allow you to enable asynchronous configurable standups in Discord.
 By initializing the bot in a channel participants will be able to enter their
-daily tasks in a web form which will be bundled and posted in the channel in a
-pinned message. 
+daily/weekly tasks in a web form which will be bundled on a public or private
+website and posted in the channel in a pinned message. 
 
 ## Current status
 
@@ -18,8 +18,8 @@ pinned message.
 - [x] Sending daily reminders
 - [x] Updating and pinning the aggregated daily
 - [x] Historical overview of standups on webpage
+- [x] Implementing a basic design
 - [ ] Clean up and testing
-- [ ] Implementing a nice design
 
 
 ## How to add the bot to your Discord server
@@ -36,6 +36,7 @@ pinned message.
  - Run the Django server (`python manage.py runserver` for a dev server, production deploy with gunicorn or uwsgi on demand)
  - Run the `python manage.py run_bot` command in a seperate background process (supervisord)
  - Run `python manage.py createsuperuser` to create a admin user
+ - Run `python manage.py collectstatic` to gather your static files for the website
  - Go to the admin on `/admin` in your browser, log in and....
    - Update the Site in Sites to match your servers URL
    - Set up the first standup types with questions
