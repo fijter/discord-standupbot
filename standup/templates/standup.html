@@ -13,7 +13,7 @@
             
             {% for answer in parti.answers.all %}
                 {% if answer.answer %}
-                <h4{% if answer.question.important %} class="important"{% endif %}>{{answer.question}}</h4>
+                <h4{% if answer.question.important %} class="important"{% endif %}>{{answer.question.question}}</h4>
                 <p>
                     {{answer.answer|linebreaksbr}}
                 </p>
