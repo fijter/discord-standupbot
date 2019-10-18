@@ -22,7 +22,7 @@
 {% endfor %}
 </div>
 {% if standup.event.standup_type.private and standup.participants.inactive.exists %}
-<div class="row mt-4">
+<div class="row mt-4 mb-5">
     <div class="col-12">
         <h4>Not filled in (yet):</h4>
         {% for parti in standup.participants.inactive %}
