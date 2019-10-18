@@ -223,6 +223,9 @@ class StandupParticipationManager(models.Manager):
     def active(self):
         return self.filter(completed=True).order_by('user__first_name')
 
+    def inactive(self):
+        return self.filter(completed=False).order_by('user__first_name')
+
 
 class StandupParticipation(models.Model):
     standup = models.ForeignKey('Standup', on_delete=models.PROTECT, related_name='participants')

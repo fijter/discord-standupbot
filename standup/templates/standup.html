@@ -21,4 +21,14 @@
     </div>
 {% endfor %}
 </div>
+{% if standup.event.standup_type.private and standup.participants.inactive.exists %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h4>Not filled in (yet):</h4>
+        {% for parti in standup.participants.inactive %}
+            {{parti.user.first_name}}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 {% endblock %}
