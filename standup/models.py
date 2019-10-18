@@ -102,6 +102,7 @@ class StandupType(models.Model):
 
 class StandupQuestion(OrderedModel):
     standup_type = models.ForeignKey('StandupType', on_delete=models.CASCADE, related_name='questions')
+    important = models.BooleanField(default=False, help_text='Will mark this answer as extra obvious if it is filled in')
     question = models.TextField()
 
     order_with_respect_to = 'standup_type'

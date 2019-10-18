@@ -38,3 +38,15 @@ form textarea {
     display: block;
     height: 120px;
 }
+
+.helptext {
+    display: block;
+    color: #777;
+    font-size: 0.8rem;
+    margin-bottom: 1.2rem;
+    margin-top: 0.2rem;
+}
+
+.important {
+    color: #e00;
+}

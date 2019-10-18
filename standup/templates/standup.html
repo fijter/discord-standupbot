@@ -12,10 +12,12 @@
             <h3>{{parti.user.first_name}}</h3>
             
             {% for answer in parti.answers.all %}
-                <h4>{{answer.question}}</h4>
+                {% if answer.answer %}
+                <h4{% if answer.question.important %} class="important"{% endif %}>{{answer.question}}</h4>
                 <p>
                     {{answer.answer}}
                 </p>
+                {% endif %}
             {% endfor %}
         </div>
     </div>

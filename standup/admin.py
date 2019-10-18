@@ -16,7 +16,7 @@ class StandupEventAdmin(admin.ModelAdmin):
 
 class StandupQuestionInline(OrderedTabularInline):
     model = models.StandupQuestion
-    fields = ('question', 'order', 'move_up_down_links',)
+    fields = ('question', 'important', 'order', 'move_up_down_links',)
     readonly_fields = ('order', 'move_up_down_links',)
     extra = 0
     ordering = ('order',)
@@ -40,10 +40,16 @@ class StandupParticipationAdmin(admin.ModelAdmin):
     inlines = (StandupParticipationAnswerInline,)
 
 
+class AttendeeAdmin(admin.ModelAdmin):
+    list_display = ('standup', 'user', 'active', 'created_by', 'created_at',)
+    raw_id_fields = ('standup', 'user',)
+
+
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.Server)
 admin.site.register(models.Channel)
 admin.site.register(models.StandupType, StandupTypeAdmin)
 admin.site.register(models.StandupEvent, StandupEventAdmin)
 admin.site.register(models.Standup)
+admin.site.register(models.Attendee, AttendeeAdmin)
 admin.site.register(models.StandupParticipation, StandupParticipationAdmin)
