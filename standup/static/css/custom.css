@@ -37,6 +37,7 @@ form textarea {
     width: 100%;
     display: block;
     height: 120px;
+    padding: 10px;
 }
 
 .helptext {

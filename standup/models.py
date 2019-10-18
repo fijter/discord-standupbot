@@ -103,12 +103,18 @@ class StandupType(models.Model):
 class StandupQuestion(OrderedModel):
     standup_type = models.ForeignKey('StandupType', on_delete=models.CASCADE, related_name='questions')
     important = models.BooleanField(default=False, help_text='Will mark this answer as extra obvious if it is filled in')
+    prefill_last_answer = models.ForeignKey(
+        'self', 
+        on_delete=models.SET_NULL, 
+        related_name='to_prefill', 
+        null=True, 
+        blank=True)
     question = models.TextField()
 
     order_with_respect_to = 'standup_type'
     
     def __str__(self):
-        return self.question
+        return '%s -> %s' % (self.standup_type, self.question)
 
 
 class StandupEventManager(models.Manager):

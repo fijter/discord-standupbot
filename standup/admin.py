@@ -16,7 +16,7 @@ class StandupEventAdmin(admin.ModelAdmin):
 
 class StandupQuestionInline(OrderedTabularInline):
     model = models.StandupQuestion
-    fields = ('question', 'important', 'order', 'move_up_down_links',)
+    fields = ('question', 'important', 'prefill_last_answer', 'order', 'move_up_down_links',)
     readonly_fields = ('order', 'move_up_down_links',)
     extra = 0
     ordering = ('order',)
