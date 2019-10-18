@@ -25,7 +25,7 @@ class Command(BaseCommand):
         @bot.command(name='addparticipant')
         async def addparticipant(ctx, standup_type, *users):
             
-            if not ctx.author.permissions_in(ctx.channel).manage_roles:
+            if not ctx.author.permissions_in(ctx.channel).manage_messages:
                 await ctx.author.send('Sorry, you have no permission to do this! Only users with the permission to manage roles for a given channel can do this.')
                 return
 
@@ -79,7 +79,7 @@ class Command(BaseCommand):
                 await ctx.message.delete()
                 return 
 
-            if not ctx.author.permissions_in(ctx.channel).manage_roles:
+            if not ctx.author.permissions_in(ctx.channel).manage_messages:
                 await ctx.author.send('Sorry, you have no permission to do this! Only users with the permission to manage roles for a given channel can do this.')
             else:
                 if models.StandupEvent.objects.create_from_discord(stype, ctx.channel, ctx.author):
