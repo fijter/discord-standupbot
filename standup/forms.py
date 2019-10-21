@@ -24,7 +24,7 @@ class StandupForm(forms.Form):
             if question.important:
                 self.fields[field_name].help_text = 'This field is optional, please leave it empty if it does not apply!'
 
-            if question.prefill_last_answer:
+            if question.prefill_last_answer and prev_parti:
                 lastans = prev_parti.answers.filter(question=question.prefill_last_answer).first()
                 if lastans:
                     self.fields[field_name].initial = lastans.answer  
