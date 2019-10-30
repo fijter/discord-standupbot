@@ -1,17 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.utils import timezone
 from ordered_model.models import OrderedModel
 from django.utils.crypto import get_random_string
 from django.urls import reverse
 from django.contrib.sites.models import Site
 from django.utils import timezone
+from timezone_field import TimeZoneField
 from django.utils.text import slugify
 import datetime
 
 
 class User(AbstractUser):
     discord_id = models.CharField(max_length=255, null=True, blank=True)
+    timezone = TimeZoneField(default=settings.TIME_ZONE)
 
     def __str__(self):
         return '%s %s (%s)' % (self.first_name, self.last_name, self.discord_id)

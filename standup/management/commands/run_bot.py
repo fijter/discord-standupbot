@@ -5,6 +5,7 @@ from discord.ext.commands import Bot, MemberConverter, errors
 from django.conf import settings
 from django.utils import timezone
 from standup import models
+import pytz
 
 
 class Command(BaseCommand):
@@ -65,6 +66,36 @@ class Command(BaseCommand):
                 for mem, reason in failed:
                     await ctx.send('Failed to add <@%s> as participants of this standup, %s.' % (mem.id, reason))
 
+
+
+        @bot.command(name='timezones')
+        async def timezones(ctx):
+            await ctx.author.send('**You can choose from the following timezones:**')
+            
+            # looping over slices of all timezones, working around max. message length of Discord
+            for i in range((len(pytz.common_timezones) // 150) + 1):
+                tzs = pytz.common_timezones[i*150:i*150+150]
+                msg = '`%s`' % '`, `'.join(tzs)
+                await ctx.author.send(msg)
+        
+        @bot.command(name='settimezone')
+        async def settimezone(ctx, timezonename):
+
+            if timezonename in pytz.common_timezones:
+                user, _ = models.User.objects.get_or_create(
+                    discord_id=ctx.author.id, 
+                    defaults={
+                        'username': ctx.author.id, 
+                        'first_name': ctx.author.display_name, 
+                        'last_name': ctx.author.discriminator
+                    })
+
+                user.timezone = timezonename
+                user.save()
+
+                await ctx.author.send('Thanks, your timezone has been set to %s' % user.timezone)
+            else:
+                await ctx.author.send('%s is a unknown timezone, please execute the `!timezones` command to see all avaiable timezones!' % timezonename)
 
 
         @bot.command(name='newstandup')

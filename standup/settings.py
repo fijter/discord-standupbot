@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'timezone_field',
     'ordered_model',
     'standup',
 ]

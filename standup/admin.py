@@ -6,7 +6,7 @@ from . import models
 
 class UserAdmin(BaseUserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'discord_id', 'is_staff')
-    fieldsets = BaseUserAdmin.fieldsets + (('Discord', {'fields': ('discord_id',)}),)
+    fieldsets = BaseUserAdmin.fieldsets + (('Discord', {'fields': ('discord_id', 'timezone')}),)
 
 
 class StandupEventAdmin(admin.ModelAdmin):
@@ -37,6 +37,7 @@ class StandupParticipationAnswerInline(admin.TabularInline):
 
 class StandupParticipationAdmin(admin.ModelAdmin):
     list_display = ('standup', 'user', 'created_at')
+    raw_id_fields = ('standup', 'user')
     inlines = (StandupParticipationAnswerInline,)
 
 
