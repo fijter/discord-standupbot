@@ -73,8 +73,8 @@ class Command(BaseCommand):
             await ctx.author.send('**You can choose from the following timezones:**')
             
             # looping over slices of all timezones, working around max. message length of Discord
-            for i in range((len(pytz.common_timezones) // 100) + 1):
-                tzs = pytz.common_timezones[i*100:i*100+100]
+            for i in range((len(pytz.common_timezones) // 75) + 1):
+                tzs = pytz.common_timezones[i*75:i*75+75]
                 msg = '`%s`' % '`, `'.join(tzs)
                 await ctx.author.send(msg)
         
