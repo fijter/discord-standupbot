@@ -2,6 +2,7 @@ import discord
 import asyncio
 from django.core.management.base import BaseCommand, CommandError
 from discord.ext.commands import Bot, MemberConverter, errors
+import discord
 from django.conf import settings
 from django.utils import timezone
 from standup import models
