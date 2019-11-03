@@ -25,6 +25,12 @@ class Command(BaseCommand):
         
         @bot.command(name='addparticipant')
         async def addparticipant(ctx, standup_type, *users):
+
+            read_only = False
+
+            if users[0] == 'readonly':
+                users.pop(0)
+                read_only = True
             
             if not ctx.author.permissions_in(ctx.channel).manage_messages:
                 await ctx.author.send('Sorry, you have no permission to do this! Only users with the permission to manage roles for a given channel can do this.')
@@ -47,7 +53,7 @@ class Command(BaseCommand):
                 except errors.BadArgument:
                     continue
 
-                success, reason = models.StandupEvent.objects.add_participant_from_discord(stype, ctx.channel, mem, ctx.author)
+                success, reason = models.StandupEvent.objects.add_participant_from_discord(stype, ctx.channel, mem, ctx.author, read_only)
 
                 if success:
                     members.append(mem)
@@ -70,6 +76,7 @@ class Command(BaseCommand):
 
         @bot.command(name='timezones')
         async def timezones(ctx):
+            await ctx.message.delete()
             await ctx.author.send('**You can choose from the following timezones:**')
             
             # looping over slices of all timezones, working around max. message length of Discord
@@ -78,8 +85,10 @@ class Command(BaseCommand):
                 msg = '`%s`' % '`, `'.join(tzs)
                 await ctx.author.send(msg)
         
+
         @bot.command(name='settimezone')
         async def settimezone(ctx, timezonename):
+            await ctx.message.delete()
 
             if timezonename in pytz.common_timezones:
                 user, _ = models.User.objects.get_or_create(
@@ -136,12 +145,18 @@ class Command(BaseCommand):
                             did = int(participant.user.discord_id)
                             user = bot.get_user(did)
                             try:
-                                await user.send('Please answer the questions for "%s" in "%s" here: %s - Thanks!' % (
-                                    participant.standup.event.standup_type.name, 
-                                    participant.standup.event.channel, 
-                                    participant.get_form_url(),))
 
-                                await user.send('You can check the results of this standup on %s' % (participant.get_private_url(),))
+                                if not participant.read_only:
+                                    await user.send('Please answer the questions for "%s" in "%s" here: %s - Thanks!' % (
+                                        participant.standup.event.standup_type.name, 
+                                        participant.standup.event.channel, 
+                                        participant.get_form_url(),))
+
+                                await user.send('You can check the results for the %s %s in %s on %s' % (
+                                participant.created_at.date(),
+                                participant.standup.event.standup_type.name, 
+                                participant.standup.event.channel, 
+                                participant.get_private_url(),))
                             except Exception as e:
                                 print('Something went wrong while sending form to the user: %s' % e)
 

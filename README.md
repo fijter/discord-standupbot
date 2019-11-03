@@ -19,6 +19,9 @@ website and posted in the channel in a pinned message.
 - [x] Updating and pinning the aggregated daily
 - [x] Historical overview of standups on webpage
 - [x] Implementing a basic design
+- [x] Private mode (only participants get the standup URL)
+- [x] Local timezone support
+- [x] Read only participant support
 - [ ] Clean up and testing
 
 

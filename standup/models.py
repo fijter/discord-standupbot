@@ -67,12 +67,11 @@ class StandupType(models.Model):
     create_on_sunday = models.BooleanField(default=False)
     private = models.BooleanField(default=False, help_text='If enabled only participants of the standup can view the standup, the public URL will be disabled!')
 
-    def in_timeslot(self):
-        now = timezone.localtime()
-        if self.create_new_event_at.hour != now.hour:
-            return False
+    def in_timeslot(self, localtime):
+        if not localtime:
+            localtime = timezone.localtime()
 
-        wd = now.weekday()
+        wd = localtime.weekday()
 
         if wd == 0:
             if self.create_on_monday:
@@ -138,7 +137,7 @@ class StandupEventManager(models.Manager):
         StandupEvent(channel=channel, standup_type=standup_type, created_by=user).save()
         return True
     
-    def add_participant_from_discord(self, standup_type, discord_channel, discord_user, creating_discord_user):
+    def add_participant_from_discord(self, standup_type, discord_channel, discord_user, creating_discord_user, read_only=False):
         '''
         Add a Discord user to a Standup, creates the user if needed.
         '''
@@ -154,7 +153,7 @@ class StandupEventManager(models.Manager):
 
         event = qs.first()
 
-        att, created = event.attending.get_or_create(user=user, defaults={'created_by': creating_user})
+        att, created = event.attending.get_or_create(user=user, defaults={'created_by': creating_user, 'read_only': read_only})
         
         if created:
             return (True, None)
@@ -177,22 +176,38 @@ class StandupEvent(models.Model):
         Returns True with the participant objects if it succeeded, False and None if there already was a event.
         '''
         today = timezone.localtime().date()
+        tomorrow = today + datetime.timedelta(days=1)
+
         att_users = []
-        if not self.standup_type.in_timeslot():
-            return (False, 'Not in timeslot')
-
+        
         if not self.standups.filter(created_at__date=today).exists():
-            s = Standup(event=self)
-            s.save()
+            if self.standup_type.in_timeslot(today):
+                s = Standup(event=self, created_at=today)
+                s.save()
 
-            for att in self.attending.filter(active=True):
-                p = StandupParticipation(standup=s, user=att.user)
+        if not self.standups.filter(created_at__date=tomorrow).exists():
+            if self.standup_type.in_timeslot(tomorrow):
+                s = Standup(event=self, created_at=tomorrow)
+                s.save()
+
+        for att in self.attending.filter(active=True):
+            aware_dt = timezone.localtime(timezone=att.user.timezone)
+            s = self.standups.filter(created_at__date=aware_dt.date()).first()
+            
+            # Don't create a participant if it's not a standup day
+            if not self.standup_type.in_timeslot(aware_dt):
+                continue
+            
+            # Skip users that are already created / received a notification
+            if not s or StandupParticipation.objects.filter(standup=s, user=att.user).exists():
+                continue
+
+            if aware_dt.time() > self.standup_type.create_new_event_at:
+                p = StandupParticipation(standup=s, user=att.user, read_only=att.read_only)
                 p.save()
                 att_users.append(p)
 
-            return (True, att_users)
-
-        return (False, 'A standup for today already exists')
+        return (True, att_users)
 
 
     def __str__(self):
@@ -203,6 +218,7 @@ class Attendee(models.Model):
     standup = models.ForeignKey('StandupEvent', on_delete=models.PROTECT, related_name='attending')
     user = models.ForeignKey('User', on_delete=models.PROTECT, related_name='attending')
     active = models.BooleanField(default=True)
+    read_only = models.BooleanField(default=False)
     created_by = models.ForeignKey('User', on_delete=models.PROTECT, related_name='created_attendees')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -240,6 +256,7 @@ class StandupParticipationManager(models.Manager):
 class StandupParticipation(models.Model):
     standup = models.ForeignKey('Standup', on_delete=models.PROTECT, related_name='participants')
     user = models.ForeignKey('User', on_delete=models.PROTECT, related_name='participations')
+    read_only = models.BooleanField(default=False)
     single_use_token = models.CharField(max_length=255, blank=True, null=True)
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
