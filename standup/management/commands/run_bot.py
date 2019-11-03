@@ -26,6 +26,8 @@ class Command(BaseCommand):
         @bot.command(name='addparticipant')
         async def addparticipant(ctx, standup_type, *users):
 
+            await ctx.message.delete()
+
             users = list(users)
             read_only = False
 
@@ -43,7 +45,6 @@ class Command(BaseCommand):
                 msg = 'Please provide a valid standup type as the argument of this function, your options are:\n\n'
                 msg += '\n'.join(['`%s` (%s)' % (s.command_name, s.name) for s in models.StandupType.objects.all()])
                 await ctx.author.send(msg)
-                await ctx.message.delete()
                 return 
 
             members = []
