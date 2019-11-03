@@ -175,28 +175,20 @@ class StandupEvent(models.Model):
         Initialize a daily standup if there's no one yet and if the conditions for creating one are met.
         Returns True with the participant objects if it succeeded, False and None if there already was a event.
         '''
-        today = timezone.localtime().date()
-        tomorrow = today + datetime.timedelta(days=1)
 
         att_users = []
-        
-        if not self.standups.filter(created_at__date=today).exists():
-            if self.standup_type.in_timeslot(today):
-                s = Standup(event=self, created_at=today)
-                s.save()
-
-        if not self.standups.filter(created_at__date=tomorrow).exists():
-            if self.standup_type.in_timeslot(tomorrow):
-                s = Standup(event=self, created_at=tomorrow)
-                s.save()
 
         for att in self.attending.filter(active=True):
             aware_dt = timezone.localtime(timezone=att.user.timezone)
-            s = self.standups.filter(created_at__date=aware_dt.date()).first()
-            
+            s = self.standups.filter(standup_date=aware_dt.date()).first()
+
             # Don't create a participant if it's not a standup day
             if not self.standup_type.in_timeslot(aware_dt):
                 continue
+            
+            if not s:
+                s = Standup(event=self, standup_date=aware_dt.date())
+                s.save()
             
             # Skip users that are already created / received a notification
             if not s or StandupParticipation.objects.filter(standup=s, user=att.user).exists():
@@ -225,14 +217,14 @@ class Attendee(models.Model):
 
 class Standup(models.Model):
     event = models.ForeignKey('StandupEvent', on_delete=models.PROTECT, related_name='standups')
+    standup_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     pinned_message_id = models.CharField(max_length=255, null=True, blank=True)
     rebuild_message = models.BooleanField(default=False)
     
     def get_public_url(self):
         current_site = Site.objects.get_current().domain
-        tz = timezone.get_default_timezone()
-        cdate = self.created_at.astimezone(tz).date()
+        cdate = self.standup_date
 
         return 'https://%s%s' % (current_site, reverse('public_standup', kwargs={
             'server': self.event.channel.server.slug, 
@@ -241,7 +233,7 @@ class Standup(models.Model):
             'date': str(cdate)}))
 
     def __str__(self):
-        return '%s -> %s' % (self.event, self.created_at.date())
+        return '%s -> %s' % (self.event, self.standup_date)
 
 
 class StandupParticipationManager(models.Manager):

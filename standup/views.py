@@ -48,7 +48,7 @@ class PublicStandupView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(PublicStandupView, self).get_context_data(**kwargs)
         standup = models.Standup.objects.filter(
-            created_at__date=kwargs['date'], 
+            standup_date=kwargs['date'], 
             event__standup_type__private=False, 
             event__channel__slug=kwargs['channel'], 
             event__channel__server__slug=kwargs['server'],

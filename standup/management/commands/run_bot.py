@@ -153,7 +153,7 @@ class Command(BaseCommand):
                                         participant.get_form_url(),))
 
                                 await user.send('You can check the results for the %s %s in %s on %s' % (
-                                participant.created_at.date(),
+                                participant.standup.standup_date,
                                 participant.standup.event.standup_type.name, 
                                 participant.standup.event.channel, 
                                 participant.get_private_url(),))
@@ -162,7 +162,7 @@ class Command(BaseCommand):
 
                 for standup in models.Standup.objects.filter(rebuild_message=True, event__standup_type__private=False):
 
-                    msg = '** %s - %s **\n\n%s' % (standup.event.standup_type.name, standup.created_at.astimezone(tz).date(), standup.get_public_url())
+                    msg = '** %s - %s **\n\n%s' % (standup.event.standup_type.name, standup.standup_date, standup.get_public_url())
 
                     channel_id = int(standup.event.channel.discord_channel_id)
                     channel = bot.get_channel(channel_id)
