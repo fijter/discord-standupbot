@@ -26,6 +26,7 @@ class Command(BaseCommand):
         @bot.command(name='addparticipant')
         async def addparticipant(ctx, standup_type, *users):
 
+            users = list(users)
             read_only = False
 
             if users[0] == 'readonly':
