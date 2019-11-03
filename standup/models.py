@@ -247,10 +247,10 @@ class Standup(models.Model):
 class StandupParticipationManager(models.Manager):
     
     def active(self):
-        return self.filter(completed=True).order_by('user__first_name')
+        return self.filter(completed=True, read_only=False).order_by('user__first_name')
 
     def inactive(self):
-        return self.filter(completed=False).order_by('user__first_name')
+        return self.filter(completed=False, read_only=False).order_by('user__first_name')
 
 
 class StandupParticipation(models.Model):
