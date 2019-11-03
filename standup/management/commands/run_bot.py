@@ -23,6 +23,20 @@ class Command(BaseCommand):
             print('Bot logged in as %s (%s)' % (bot.user.name, bot.user.id))
             print('-----------------------------------')
         
+        bot.remove_command('help')
+
+        @bot.command()
+        async def standup(ctx):
+            await ctx.message.delete()
+
+            embed = discord.Embed(title="StandupBot Help", description="These commands are available:")
+            embed.add_field(name="!timezones", value="Shows all available timezones to pick from", inline=False)
+            embed.add_field(name="!settimezone <tz_name>", value="Set a timezone from the `!timezones` list", inline=False)
+            embed.add_field(name="!newstandup <standup_type>", value="Start a new standup for the channel you are in", inline=False)
+            embed.add_field(name="!addparticipant <standup_type> [readonly] <user 1> <user 2>...", value="Add a new participant for a standup, optionally read only. You can add multiple add the same time", inline=False)
+            
+            await ctx.author.send(embed=embed)
+
         @bot.command(name='addparticipant')
         async def addparticipant(ctx, standup_type, *users):
 
