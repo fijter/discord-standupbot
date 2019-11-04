@@ -44,3 +44,4 @@ website and posted in the channel in a pinned message.
    - Update the Site in Sites to match your servers URL
    - Set up the first standup types with questions
  - Start using the bot in Discord using the `!newstandup` and `!addparticipant` commands
+ - See all available commands by executing `!standup`, the bot will DM a overview
