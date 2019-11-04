@@ -32,6 +32,7 @@ class Command(BaseCommand):
 
             embed = discord.Embed(title="**StandupBot Help**", description="These commands are available:")
             embed.add_field(name="**!timezones**", value="Shows all available timezones to pick from", inline=False)
+            embed.add_field(name="**!findtimezone <name>**", value="Shows all available timezones to pick from matching the given name, for easier lookup", inline=False)
             embed.add_field(name="**!settimezone <tz_name>**", value="Set a timezone from the `!timezones` list", inline=False)
             embed.add_field(name="**!newstandup <standup_type>**", value="Start a new standup for the channel you are in", inline=False)
             embed.add_field(name="**!addparticipant <standup_type> [readonly] <user 1> <user 2>...**", value="Add a new participant for a standup, optionally read only. You can add multiple add the same time", inline=False)
@@ -99,6 +100,19 @@ class Command(BaseCommand):
             # looping over slices of all timezones, working around max. message length of Discord
             for i in range((len(pytz.common_timezones) // 75) + 1):
                 tzs = pytz.common_timezones[i*75:i*75+75]
+                msg = '`%s`' % '`, `'.join(tzs)
+                await ctx.author.send(msg)
+        
+
+        @bot.command(name='findtimezone')
+        async def findtimezone(ctx, name):
+            await ctx.message.delete()
+            await ctx.author.send('**Found the following timezones for `%s`:**' % name)
+            
+            # looping over slices of all timezones, working around max. message length of Discord
+            ftzs = [x for x in pytz.common_timezones if name.lower() in x.lower()]
+            for i in range((len(ftzs) // 75) + 1):
+                tzs = ftzs[i*75:i*75+75]
                 msg = '`%s`' % '`, `'.join(tzs)
                 await ctx.author.send(msg)
         
