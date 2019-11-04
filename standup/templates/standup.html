@@ -15,7 +15,7 @@
                 {% if answer.answer %}
                 <h4{% if answer.question.important %} class="important"{% endif %}>{{answer.question.question}}</h4>
                 <p>
-                    {{answer.answer|linebreaksbr}}
+                    {{answer.answer|urlize|linebreaksbr}}
                 </p>
                 {% endif %}
             {% endfor %}
