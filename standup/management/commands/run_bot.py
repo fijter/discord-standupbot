@@ -28,7 +28,10 @@ class Command(BaseCommand):
 
         @bot.command()
         async def standup(ctx):
-            await ctx.message.delete()
+            try:
+                await ctx.message.delete()
+            except discord.errors.Forbidden:
+                pass
 
             embed = discord.Embed(title="**StandupBot Help**", description="These commands are available:")
             embed.add_field(name="**!timezones**", value="Shows all available timezones to pick from", inline=False)
@@ -94,7 +97,12 @@ class Command(BaseCommand):
 
         @bot.command(name='timezones')
         async def timezones(ctx):
-            await ctx.message.delete()
+
+            try:
+                await ctx.message.delete()
+            except discord.errors.Forbidden:
+                pass
+
             await ctx.author.send('**You can choose from the following timezones:**')
             
             # looping over slices of all timezones, working around max. message length of Discord
@@ -106,7 +114,11 @@ class Command(BaseCommand):
 
         @bot.command(name='findtimezone')
         async def findtimezone(ctx, name):
-            await ctx.message.delete()
+            try:
+                await ctx.message.delete()
+            except discord.errors.Forbidden:
+                pass
+
             await ctx.author.send('**Found the following timezones for `%s`:**' % name)
             
             # looping over slices of all timezones, working around max. message length of Discord
@@ -119,7 +131,10 @@ class Command(BaseCommand):
 
         @bot.command(name='settimezone')
         async def settimezone(ctx, timezonename):
-            await ctx.message.delete()
+            try:
+                await ctx.message.delete()
+            except discord.errors.Forbidden:
+                pass
 
             if timezonename in pytz.common_timezones:
                 user, _ = models.User.objects.get_or_create(
