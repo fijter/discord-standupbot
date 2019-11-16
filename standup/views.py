@@ -1,8 +1,17 @@
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, ListView
 from django.http import Http404
 from django.urls import reverse
 from . import models
 from . import forms
+
+
+class HomeView(ListView):
+    template_name = 'standups.html'
+    model = models.Standup
+    paginate_by = 50
+    paginate_orphans = 4
+    context_object_name = 'standups'
+    queryset = models.Standup.objects.filter(event__standup_type__private=False).order_by('-created_at')
 
 
 class StandupFormView(FormView):

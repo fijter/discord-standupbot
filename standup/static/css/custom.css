@@ -51,3 +51,23 @@ form textarea {
 .important {
     color: #e00;
 }
+
+h1 {
+    border-bottom: 2px solid;
+    margin-bottom: 1em;
+    padding-bottom: 10px;
+}
+
+a {
+    color: black;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+nav a {
+    text-decoration: none;
+}
+
+.pagination {
+    margin-top: 50px;
+}
