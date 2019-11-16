@@ -262,6 +262,10 @@ class StandupParticipation(models.Model):
     def get_private_url(self):
         current_site = Site.objects.get_current().domain
         return 'https://%s%s' % (current_site, reverse('private_standup', kwargs={'token': self.single_use_token}))
+    
+    def get_home_url(self):
+        current_site = Site.objects.get_current().domain
+        return 'https://%s%s' % (current_site, reverse('private_home', kwargs={'token': self.single_use_token}))
 
     def save(self, *args, **kwargs):
         if not self.single_use_token:

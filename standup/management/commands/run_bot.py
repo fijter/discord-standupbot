@@ -198,11 +198,8 @@ class Command(BaseCommand):
                                         participant.standup.event.channel, 
                                         participant.get_form_url(),))
 
-                                await user.send('You can check the results for the %s %s in %s on %s' % (
-                                participant.standup.standup_date,
-                                participant.standup.event.standup_type.name, 
-                                participant.standup.event.channel, 
-                                participant.get_private_url(),))
+                                await user.send('You can view your private standup overview here: %s' % (
+                                participant.get_home_url(),))
                             except Exception as e:
                                 print('Something went wrong while sending form to the user: %s' % e)
 

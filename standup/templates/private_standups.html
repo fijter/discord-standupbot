@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}All public standups{% endblock %}
+{% block content %}
+
+<h1>Your standups</h1>
+<div class="row">
+{% for participation in participations %}
+    {% with participation.standup as standup %}
+        <div class="col-12 col-md-6">
+            <p>
+                <a href="{{participation.get_private_url}}">#{{standup.event.channel.name}} - {{standup.event.standup_type.name}}</a><br>
+                {{standup.created_at|date:"M d\t\h, Y"}} - {{standup.participants.active.count}} participants - {% if participation.completed %}&check;{% else %}&cross;{% endif %}
+            </p>
+        </div>
+    {% endwith %}
+{% endfor %}
+</div>
+
+<div class="row pagination">
+    <div class="col-sm-6">
+        {% if page_obj.has_previous %}<a href="?page={{page_obj.previous_page_number}}">Previous page</a>{% endif %}
+    </div>
+    <div class="col-sm-6" style="text-align: right;">
+        {% if page_obj.has_next %}<a href="?page={{page_obj.next_page_number}}">Next page</a>{% endif %}
+    </div>
+</div>
+
+{% endblock %}

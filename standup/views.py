@@ -14,6 +14,22 @@ class HomeView(ListView):
     queryset = models.Standup.objects.filter(event__standup_type__private=False).order_by('-created_at')
 
 
+class PrivateHomeView(ListView):
+    template_name = 'private_standups.html'
+    model = models.StandupParticipation
+    paginate_by = 50
+    paginate_orphans = 4
+    context_object_name = 'participations'
+
+    def get_queryset(self):
+        try:
+            p = models.StandupParticipation.objects.get(single_use_token=self.kwargs.get('token'))
+        except models.StandupParticipation.DoesNotExist:
+            return self.model.objects.none()
+
+        return self.model.objects.filter(user=p.user).order_by('-created_at').distinct()
+
+
 class StandupFormView(FormView):
     template_name = 'standup_form.html'
     form_class = forms.StandupForm
@@ -25,7 +41,7 @@ class StandupFormView(FormView):
     def get_success_url(self):
         p = models.StandupParticipation.objects.get(single_use_token=self.kwargs.get('token'))
         if p.standup.event.standup_type.private:
-            return p.get_private_url()
+            return p.get_home_url()
         else:
             return p.standup.get_public_url()
 
@@ -84,4 +100,5 @@ class PrivateStandupView(TemplateView):
             raise Http404('Standup not found!')
         
         context['standup'] = standup
+        context['token'] = kwargs['token']
         return context
