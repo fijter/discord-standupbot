@@ -4,14 +4,22 @@
 
 <h1>All public standups</h1>
 <div class="row">
-{% for standup in standups %}
-    <div class="col-12 col-md-6">
+    <div class="col-4 col-md-3">
+        <ul>
+            <li>All</li>
+            {% for channel in channels %}
+            <li><a href="?channel={{channel}}">#{{channel}}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-8 col-md-9">
+        {% for standup in standups %}
         <p>
             <a href="{{standup.get_public_url}}">#{{standup.event.channel.name}} - {{standup.event.standup_type.name}}</a><br>
             {{standup.created_at|date:"M d\t\h, Y"}} - {{standup.participants.active.count}} participants
         </p>
+        {% endfor %}
     </div>
-{% endfor %}
 </div>
 
 <div class="row pagination">

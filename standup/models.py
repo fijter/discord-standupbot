@@ -224,7 +224,7 @@ class Standup(models.Model):
     rebuild_message = models.BooleanField(default=False)
 
     def previous_standup(self):
-        return Standup.objects.filter(id__lt=self.id, event=self.event).first()
+        return Standup.objects.filter(id__lt=self.id, event=self.event).order_by('-id').first()
     
     def get_public_url(self):
         current_site = Site.objects.get_current().domain
@@ -260,7 +260,7 @@ class StandupParticipation(models.Model):
     objects = StandupParticipationManager()
 
     def previous_participation(self):
-        return StandupParticipation.objects.filter(id__lt=self.id, standup__event=self.standup.event, user=self.user).first()
+        return StandupParticipation.objects.filter(id__lt=self.id, standup__event=self.standup.event, user=self.user).order_by('-id').first()
 
     def get_form_url(self):
         current_site = Site.objects.get_current().domain

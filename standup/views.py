@@ -13,6 +13,11 @@ class HomeView(ListView):
     context_object_name = 'standups'
     queryset = models.Standup.objects.filter(event__standup_type__private=False).order_by('-created_at')
 
+    def get_context_data(self, **kwargs):
+        context = super(HomeView, self).get_context_data(**kwargs)
+        context['channels'] = set(self.get_queryset().values_list('event__channel__slug', flat=True))
+        return context
+
 
 class PrivateHomeView(ListView):
     template_name = 'private_standups.html'
