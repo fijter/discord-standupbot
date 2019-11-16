@@ -3,6 +3,15 @@
 {% block content %}
 <h1>{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}</h1>
 <h2>{{standup.event.standup_type.name}} - {{standup.created_at|date:"M d\t\h, Y"}}</h2>
+{% if standup.event.standup_type.private %}
+    {% with participation.previous_participation as prev %}
+        {% if prev %}<a href="{{prev.get_private_url}}">Back to {{prev.standup.standup_date|date:"M d\t\h, Y"}}</a>{% endif %}
+    {% endwith %}
+{% else %}
+    {% with standup.previous_standup as prev %}
+        {% if prev %}<a href="{{prev.get_public_url}}">Back to {{prev.standup_date|date:"M d\t\h, Y"}}</a>{% endif %}
+    {% endwith %}
+{% endif %}
 
 
 <div class="row">

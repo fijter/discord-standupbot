@@ -222,6 +222,9 @@ class Standup(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     pinned_message_id = models.CharField(max_length=255, null=True, blank=True)
     rebuild_message = models.BooleanField(default=False)
+
+    def previous_standup(self):
+        return Standup.objects.filter(id__lt=self.id, event=self.event).first()
     
     def get_public_url(self):
         current_site = Site.objects.get_current().domain
@@ -255,6 +258,9 @@ class StandupParticipation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = StandupParticipationManager()
+
+    def previous_participation(self):
+        return StandupParticipation.objects.filter(id__lt=self.id, standup__event=self.standup.event, user=self.user).first()
 
     def get_form_url(self):
         current_site = Site.objects.get_current().domain

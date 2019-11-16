@@ -101,4 +101,5 @@ class PrivateStandupView(TemplateView):
         
         context['standup'] = standup
         context['token'] = kwargs['token']
+        context['participation'] = models.StandupParticipation.objects.get(single_use_token=kwargs['token'])
         return context
