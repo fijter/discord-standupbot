@@ -66,6 +66,7 @@ class StandupType(models.Model):
     create_on_saturday = models.BooleanField(default=False)
     create_on_sunday = models.BooleanField(default=False)
     private = models.BooleanField(default=False, help_text='If enabled only participants of the standup can view the standup, the public URL will be disabled!')
+    public_publish_after = models.DurationField(default=datetime.timedelta(hours=32))
 
     def in_timeslot(self, localtime):
         if not localtime:

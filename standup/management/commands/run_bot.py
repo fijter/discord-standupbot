@@ -205,6 +205,20 @@ class Command(BaseCommand):
 
                 for standup in models.Standup.objects.filter(rebuild_message=True, event__standup_type__private=False):
 
+                    # Check for the public notification release date
+                    startdate = timezone.datetime(
+                        standup.standup_date.year, 
+                        standup.standup_date.month, 
+                        standup.standup_date.day, 
+                        standup.event.standup_type.create_new_event_at.hour, 
+                        standup.event.standup_type.create_new_event_at.minute, 
+                        tzinfo=tz)
+
+                    notify_date = startdate + standup.event.standup_type.public_publish_after
+
+                    if timezone.now() < notify_date:
+                        continue
+
                     msg = '** %s - %s **\n\n%s' % (standup.event.standup_type.name, standup.standup_date, standup.get_public_url())
 
                     channel_id = int(standup.event.channel.discord_channel_id)
