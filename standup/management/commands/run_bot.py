@@ -162,7 +162,7 @@ class Command(BaseCommand):
                 pass
         
             try:
-                until = datetime.date(date.split('/'))
+                until = datetime.date(*[int(x) for x in date.split('/')])
             except:
                 await ctx.author.send('Unable to mute you, date format unknown. Please provide a date like this: YYYY/MM/DD, so for example `!mute_until 2020/01/01`')
                 
