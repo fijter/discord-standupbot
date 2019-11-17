@@ -226,6 +226,9 @@ class Standup(models.Model):
     def previous_standup(self):
         return Standup.objects.filter(id__lt=self.id, event=self.event).order_by('-id').first()
     
+    def next_standup(self):
+        return Standup.objects.filter(id__gt=self.id, event=self.event).order_by('id').first()
+    
     def get_public_url(self):
         current_site = Site.objects.get_current().domain
         cdate = self.standup_date
@@ -261,6 +264,9 @@ class StandupParticipation(models.Model):
 
     def previous_participation(self):
         return StandupParticipation.objects.filter(id__lt=self.id, standup__event=self.standup.event, user=self.user).order_by('-id').first()
+    
+    def next_participation(self):
+        return StandupParticipation.objects.filter(id__gt=self.id, standup__event=self.standup.event, user=self.user).order_by('id').first()
 
     def get_form_url(self):
         current_site = Site.objects.get_current().domain

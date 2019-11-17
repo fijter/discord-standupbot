@@ -9,7 +9,7 @@
         <div class="col-12 col-md-6">
             <p>
                 <a href="{{participation.get_private_url}}">#{{standup.event.channel.name}} - {{standup.event.standup_type.name}}</a><br>
-                {{standup.created_at|date:"M d\t\h, Y"}} - {{standup.participants.active.count}} participants - {% if participation.completed %}&check;{% else %}&cross;{% endif %}
+                {{standup.standup_date|date:"M d\t\h, Y"}} - {{standup.participants.active.count}} participants - {% if participation.completed %}&check;{% else %}&cross;{% endif %}
             </p>
         </div>
     {% endwith %}

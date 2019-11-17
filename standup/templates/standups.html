@@ -16,7 +16,7 @@
         {% for standup in standups %}
         <p>
             <a href="{{standup.get_public_url}}">#{{standup.event.channel.name}} - {{standup.event.standup_type.name}}</a><br>
-            {{standup.created_at|date:"M d\t\h, Y"}} - {{standup.participants.active.count}} participants
+            {{standup.standup_date|date:"M d\t\h, Y"}} - {{standup.participants.active.count}} participants
         </p>
         {% endfor %}
     </div>
