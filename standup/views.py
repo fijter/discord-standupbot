@@ -11,11 +11,25 @@ class HomeView(ListView):
     paginate_by = 50
     paginate_orphans = 4
     context_object_name = 'standups'
-    queryset = models.Standup.objects.filter(event__standup_type__private=False).order_by('-created_at')
+    
+    def get_queryset(self, bypass=False):
+        qs = models.Standup.objects.filter(event__standup_type__private=False).order_by('-created_at')
+
+        if bypass:
+            return qs
+
+        if self.request.GET.get('server'):
+            qs = qs.filter(event__channel__server__slug=self.request.GET.get('server'))
+        if self.request.GET.get('channel'):
+            qs = qs.filter(event__channel__slug=self.request.GET.get('channel'))
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super(HomeView, self).get_context_data(**kwargs)
-        context['channels'] = set(self.get_queryset().values_list('event__channel__slug', flat=True))
+        context['channels'] = set(self.get_queryset(bypass=True).values_list('event__channel__slug', 'event__channel__server__slug').order_by('event__channel__server__slug', 'event__channel__slug'))
+        if self.request.GET.get('channel') and self.request.GET.get('server'):
+            context['channel'] = models.Channel.objects.get(slug=self.request.GET.get('channel'), server__slug=self.request.GET.get('server'))
         return context
 
 

@@ -2,17 +2,17 @@
 {% block title %}All public standups{% endblock %}
 {% block content %}
 
-<h1>All public standups</h1>
+<h1>All public standups{% if channel %} for #{{channel.slug}} ({{channel.server.name}}){% endif %}</h1>
 <div class="row">
-    <div class="col-4 col-md-3">
+    <div class="col-12 col-md-3">
         <ul>
-            <li>All</li>
-            {% for channel in channels %}
-            <li><a href="?channel={{channel}}">#{{channel}}</a></li>
+            <li><a href="/">All</a></li>
+            {% for channel, server in channels %}
+            <li><a href="?channel={{channel}}&server={{server}}">#{{channel}}</a></li>
             {% endfor %}
         </ul>
     </div>
-    <div class="col-8 col-md-9">
+    <div class="col-12 col-md-9">
         {% for standup in standups %}
         <p>
             <a href="{{standup.get_public_url}}">#{{standup.event.channel.name}} - {{standup.event.standup_type.name}}</a><br>
