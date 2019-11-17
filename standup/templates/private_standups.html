@@ -2,19 +2,29 @@
 {% block title %}All public standups{% endblock %}
 {% block content %}
 
-<h1>Your standups</h1>
+<h1>Your standups{% if channel %} for #{{channel.slug}} ({{channel.server.name}}){% endif %}</h1>
+
 <div class="row">
-{% for participation in participations %}
-    {% with participation.standup as standup %}
-        <div class="col-12 col-md-6">
-            <p>
-                <a href="{{participation.get_private_url}}">#{{standup.event.channel.name}} - {{standup.event.standup_type.name}}</a><br>
-                {{standup.standup_date|date:"M d\t\h, Y"}} - {{standup.participants.active.count}} participants - {% if participation.completed %}&check;{% else %}&cross;{% endif %}
-            </p>
-        </div>
-    {% endwith %}
-{% endfor %}
+    <div class="col-12 col-md-3">
+        <ul>
+            <li><a href="{{request.path}}">All</a></li>
+            {% for channel, server in channels %}
+            <li><a href="?channel={{channel}}&server={{server}}">#{{channel}}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-12 col-md-9">
+        {% for participation in participations %}
+            {% with participation.standup as standup %}
+                <p>
+                    <a href="{{participation.get_private_url}}">#{{standup.event.channel.name}} - {{standup.event.standup_type.name}}</a><br>
+                    {{standup.standup_date|date:"M d\t\h, Y"}} - {{standup.participants.active.count}} participants - {% if participation.completed %}&check;{% else %}&cross;{% endif %}
+                </p>
+            {% endwith %}
+        {% endfor %}
+    </div>
 </div>
+
 
 <div class="row pagination">
     <div class="col-sm-6">

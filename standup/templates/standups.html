@@ -6,7 +6,7 @@
 <div class="row">
     <div class="col-12 col-md-3">
         <ul>
-            <li><a href="/">All</a></li>
+            <li><a href="{{request.path}}">All</a></li>
             {% for channel, server in channels %}
             <li><a href="?channel={{channel}}&server={{server}}">#{{channel}}</a></li>
             {% endfor %}

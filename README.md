@@ -22,8 +22,10 @@ website and posted in the channel in a pinned message.
 - [x] Private mode (only participants get the standup URL)
 - [x] Local timezone support
 - [x] Read only participant support
-- [ ] Clean up and testing
-
+- [x] Support for reporting X hours after initial start of standup
+- [x] Support for browsing history in the browser
+- [ ] Support for reminders when not filled
+- [ ] Support for snoozing DM's for X days (vacation mode)
 
 ## How to add the bot to your Discord server
 

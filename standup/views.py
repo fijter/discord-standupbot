@@ -40,13 +40,31 @@ class PrivateHomeView(ListView):
     paginate_orphans = 4
     context_object_name = 'participations'
 
-    def get_queryset(self):
+    def get_queryset(self, bypass=False):
         try:
             p = models.StandupParticipation.objects.get(single_use_token=self.kwargs.get('token'))
         except models.StandupParticipation.DoesNotExist:
             return self.model.objects.none()
 
-        return self.model.objects.filter(user=p.user).order_by('-created_at').distinct()
+        qs = self.model.objects.filter(user=p.user).order_by('-created_at').distinct()
+        
+        if bypass:
+            return qs
+
+        if self.request.GET.get('server'):
+            qs = qs.filter(standup__event__channel__server__slug=self.request.GET.get('server'))
+        if self.request.GET.get('channel'):
+            qs = qs.filter(standup__event__channel__slug=self.request.GET.get('channel'))
+
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super(PrivateHomeView, self).get_context_data(**kwargs)
+        context['channels'] = set(self.get_queryset(bypass=True).values_list('standup__event__channel__slug', 'standup__event__channel__server__slug')\
+            .order_by('standup__event__channel__server__slug', 'standup__event__channel__slug'))
+        if self.request.GET.get('channel') and self.request.GET.get('server'):
+            context['channel'] = models.Channel.objects.get(slug=self.request.GET.get('channel'), server__slug=self.request.GET.get('server'))
+        return context
 
 
 class StandupFormView(FormView):
