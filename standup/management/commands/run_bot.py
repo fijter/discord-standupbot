@@ -5,6 +5,7 @@ from discord.ext.commands import Bot, MemberConverter, errors
 import discord
 from django.conf import settings
 from django.utils import timezone
+import datetime
 from standup import models
 import pytz
 
@@ -37,6 +38,7 @@ class Command(BaseCommand):
             embed.add_field(name="**!timezones**", value="Shows all available timezones to pick from", inline=False)
             embed.add_field(name="**!findtimezone <name>**", value="Shows all available timezones to pick from matching the given name, for easier lookup", inline=False)
             embed.add_field(name="**!settimezone <tz_name>**", value="Set a timezone from the `!timezones` list", inline=False)
+            embed.add_field(name="**!mute_until <yyyy/mm/dd>**", value="Mute yourself from standup participation until a given date, good for vacations", inline=False)
             embed.add_field(name="**!newstandup <standup_type>**", value="Start a new standup for the channel you are in", inline=False)
             embed.add_field(name="**!addparticipant <standup_type> [readonly] <user 1> <user 2>...**", value="Add a new participant for a standup, optionally read only. You can add multiple add the same time", inline=False)
             
@@ -151,6 +153,31 @@ class Command(BaseCommand):
                 await ctx.author.send('Thanks, your timezone has been set to %s' % user.timezone)
             else:
                 await ctx.author.send('%s is a unknown timezone, please execute the `!timezones` command to see all avaiable timezones!' % timezonename)
+
+        @bot.command(name='mute_until')
+        async def mute_until(ctx, date):
+            try:
+                await ctx.message.delete()
+            except discord.errors.Forbidden:
+                pass
+        
+            try:
+                until = datetime.date(date.split('/'))
+            except:
+                await ctx.author.send('Unable to mute you, date format unknown. Please provide a date like this: YYYY/MM/DD, so for example `!mute_until 2020/01/01`')
+                
+            user, _ = models.User.objects.get_or_create(
+                discord_id=ctx.author.id, 
+                defaults={
+                    'username': ctx.author.id, 
+                    'first_name': ctx.author.display_name, 
+                    'last_name': ctx.author.discriminator
+                })
+            
+            user.mute_until = until
+            user.save()
+
+            await ctx.author.send('Thanks, you won\'t participate in standups until %s' % until)
 
 
         @bot.command(name='newstandup')

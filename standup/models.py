@@ -15,6 +15,7 @@ import datetime
 class User(AbstractUser):
     discord_id = models.CharField(max_length=255, null=True, blank=True)
     timezone = TimeZoneField(default=settings.TIME_ZONE)
+    mute_until = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return '%s %s (%s)' % (self.first_name, self.last_name, self.discord_id)
@@ -185,6 +186,10 @@ class StandupEvent(models.Model):
 
             # Don't create a participant if it's not a standup day
             if not self.standup_type.in_timeslot(aware_dt):
+                continue
+
+            # Don't create a participant if muted
+            if att.user.mute_until and att.user.mute_until >= aware_dt.date():
                 continue
             
             if not s:
