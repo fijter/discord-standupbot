@@ -6,7 +6,7 @@ from . import models
 
 class UserAdmin(BaseUserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'discord_id', 'is_staff')
-    fieldsets = BaseUserAdmin.fieldsets + (('Discord', {'fields': ('discord_id', 'timezone')}),)
+    fieldsets = BaseUserAdmin.fieldsets + (('Discord', {'fields': ('discord_id', 'timezone', 'mute_until')}),)
 
 
 class StandupEventAdmin(admin.ModelAdmin):
