@@ -2,6 +2,7 @@
 {% block title %}{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}{% endblock %}
 {% block content %}
 <h1>{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}</h1>
+<h2>{{standup.event.standup_type.name}} - {{standup.standup_date|date:"M d\t\h, Y"}}</h2>
 
 <div class="row">
 {% if standup.event.standup_type.private %}
@@ -36,8 +37,6 @@
     {% endwith %}
 {% endif %}
 </div>
-
-<h2>{{standup.event.standup_type.name}} - {{standup.standup_date|date:"M d\t\h, Y"}}</h2>
 
 <div class="row">
 {% for parti in standup.participants.active %}
