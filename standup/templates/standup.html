@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}{% endblock %}
 {% block content %}
+<h1>{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}</h1>
+
 <div class="row">
 {% if standup.event.standup_type.private %}
     {% with participation.previous_participation as prev %}
@@ -35,7 +37,6 @@
 {% endif %}
 </div>
 
-<h1>{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}</h1>
 <h2>{{standup.event.standup_type.name}} - {{standup.standup_date|date:"M d\t\h, Y"}}</h2>
 
 <div class="row">
