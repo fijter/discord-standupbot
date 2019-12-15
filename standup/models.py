@@ -254,21 +254,41 @@ class Standup(models.Model):
         channel_id = int(standup.event.channel.discord_channel_id)
         channel = bot.get_channel(channel_id)
 
+        participants = standup.participants.active()
+        
+        # Don't send if the standup had no participant
+        if not participants.exists():
+            return
+
         msg_obj = await channel.send(msg)
+
+        for parti in participants:
+            if not parti.answers.exists():
+                continue
+
+            msg = '**<@%s>**:\n' % parti.user.discord_id
+            for ans in parti.answers.all().order_by('question__order'):
+                if not ans.answer:
+                    continue
+
+                msg = '%s\n**%s**:\n\n%s\n' % (msg, ans.question.question, ans.answer)
+
+            if len(msg) > 1950:
+                msg = '%s...\n\n' % msg[0:1950]
+            else:
+                msg = '%s\n\n' % msg
+            
+            await channel.send(msg)
+        
+        if standup.participants.inactive().exists():
+            inactive = ', '.join(['<@%s>' % x.user.discord_id for x in standup.participants.inactive()])
+            msg = '**Not filled in (yet) by: ** %s' % (inactive,)
+            await channel.send(msg)
+
         await msg_obj.pin()
         standup.pinned_message_id = msg_obj.id
         standup.rebuild_message = False
         standup.save()
-
-        for parti in standup.participants.active():
-            msg = '**%s**:\n'
-            for ans in part.answers.all():
-                msg = '%s\n**%s**:\n\n%s\n' % (msg, ans.question.question, ans.answer)
-
-            if len(msg) > 1950:
-                msg = '%s...' % msg[0:1950]
-            
-            await channel.send(msg)
 
     def previous_standup(self):
         return Standup.objects.filter(id__lt=self.id, event=self.event).order_by('-id').first()
