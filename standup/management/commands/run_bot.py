@@ -43,6 +43,27 @@ class Command(BaseCommand):
             embed.add_field(name="**!addparticipant <standup_type> [readonly] <user 1> <user 2>...**", value="Add a new participant for a standup, optionally read only. You can add multiple add the same time", inline=False)
             
             await ctx.author.send(embed=embed)
+        
+        @bot.command(name='sendsummary')
+        async def sendsummary(ctx, standup_type):
+
+            await ctx.message.delete()
+
+            if not ctx.author.permissions_in(ctx.channel).manage_messages:
+                await ctx.author.send('Sorry, you have no permission to do this! Only users with the permission to manage messages for a given channel can do this.')
+                return
+
+            try:
+                stype = models.StandupType.objects.get(command_name=standup_type)
+            except models.StandupType.DoesNotExist:
+                msg = 'Please provide a valid standup type as the argument of this function, your options are:\n\n'
+                msg += '\n'.join(['`%s` (%s)' % (s.command_name, s.name) for s in models.StandupType.objects.all()])
+                await ctx.author.send(msg)
+                return 
+
+            standup = Standup.objects.filter(event__standup_type=stype, event__channel__discord_channel_id=ctx.channel.id, event__standup_type__publish_to_channel=True).order_by('-id').first()
+            if standup:
+                await standup.send_summary(bot)
 
         @bot.command(name='addparticipant')
         async def addparticipant(ctx, standup_type, *users):
@@ -230,34 +251,8 @@ class Command(BaseCommand):
                             except Exception as e:
                                 print('Something went wrong while sending form to the user: %s' % e)
 
-                for standup in models.Standup.objects.filter(rebuild_message=True, event__standup_type__private=False):
-
-                    # Check for the public notification release date
-                    startdate = timezone.datetime(
-                        standup.standup_date.year, 
-                        standup.standup_date.month, 
-                        standup.standup_date.day, 
-                        standup.event.standup_type.create_new_event_at.hour, 
-                        standup.event.standup_type.create_new_event_at.minute, 
-                        tzinfo=tz)
-
-                    notify_date = startdate + standup.event.standup_type.public_publish_after
-
-                    if timezone.now() < notify_date:
-                        continue
-
-                    msg = '** %s - %s **\n\n%s' % (standup.event.standup_type.name, standup.standup_date, standup.get_public_url())
-
-                    channel_id = int(standup.event.channel.discord_channel_id)
-                    channel = bot.get_channel(channel_id)
-
-                    if not standup.pinned_message_id:
-                        # Create new and save message id
-                        msg_obj = await channel.send(msg)
-                        await msg_obj.pin()
-                        standup.pinned_message_id = msg_obj.id
-                        standup.rebuild_message = False
-                        standup.save()
+                for standup in models.Standup.objects.filter(pinned_message_id__isnull=True, rebuild_message=True, event__standup_type__publish_to_channel=True):
+                    await standup.send_summary(bot)
                                 
 
                 await asyncio.sleep(10)

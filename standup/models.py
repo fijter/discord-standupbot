@@ -67,7 +67,9 @@ class StandupType(models.Model):
     create_on_saturday = models.BooleanField(default=False)
     create_on_sunday = models.BooleanField(default=False)
     private = models.BooleanField(default=False, help_text='If enabled only participants of the standup can view the standup, the public URL will be disabled!')
-    public_publish_after = models.DurationField(default=datetime.timedelta(hours=32))
+    public_publish_after = models.DurationField(default=datetime.timedelta(hours=24))
+    publish_to_channel = models.BooleanField(default=False, help_text="publish to the channel even if it's a private standup")
+
 
     def in_timeslot(self, localtime):
         if not localtime:
@@ -227,6 +229,46 @@ class Standup(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     pinned_message_id = models.CharField(max_length=255, null=True, blank=True)
     rebuild_message = models.BooleanField(default=False)
+
+    async def send_summary(self, bot):
+        standup = self
+        tz = timezone.get_default_timezone()
+        # Check for the public notification release date
+        startdate = timezone.datetime(
+            standup.standup_date.year, 
+            standup.standup_date.month, 
+            standup.standup_date.day, 
+            standup.event.standup_type.create_new_event_at.hour, 
+            standup.event.standup_type.create_new_event_at.minute, 
+            tzinfo=tz)
+
+        notify_date = startdate + standup.event.standup_type.public_publish_after
+
+        if timezone.now() < notify_date:
+            return
+
+        msg = '** %s - %s **\n' % (standup.event.standup_type.name, standup.standup_date)
+        if not standup.event.standup_type.private:
+            msg = '%s\n%s' % (msg, standup.get_public_url())
+
+        channel_id = int(standup.event.channel.discord_channel_id)
+        channel = bot.get_channel(channel_id)
+
+        msg_obj = await channel.send(msg)
+        await msg_obj.pin()
+        standup.pinned_message_id = msg_obj.id
+        standup.rebuild_message = False
+        standup.save()
+
+        for parti in standup.participants.active():
+            msg = '**%s**:\n'
+            for ans in part.answers.all():
+                msg = '%s\n**%s**:\n\n%s\n' % (msg, ans.question.question, ans.answer)
+
+            if len(msg) > 1950:
+                msg = '%s...' % msg[0:1950]
+            
+            await channel.send(msg)
 
     def previous_standup(self):
         return Standup.objects.filter(id__lt=self.id, event=self.event).order_by('-id').first()
