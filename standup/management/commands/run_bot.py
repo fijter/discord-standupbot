@@ -63,7 +63,10 @@ class Command(BaseCommand):
 
             standup = Standup.objects.filter(event__standup_type=stype, event__channel__discord_channel_id=ctx.channel.id, event__standup_type__publish_to_channel=True).order_by('-id').first()
             if standup:
+                await ctx.author.send('Sending summary for %s' % standup)
                 await standup.send_summary(bot)
+            else:
+                await ctx.author.send('Standup not found, can\'t publish!')
 
         @bot.command(name='addparticipant')
         async def addparticipant(ctx, standup_type, *users):
