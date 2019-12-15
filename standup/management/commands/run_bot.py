@@ -60,8 +60,10 @@ class Command(BaseCommand):
                 msg += '\n'.join(['`%s` (%s)' % (s.command_name, s.name) for s in models.StandupType.objects.all()])
                 await ctx.author.send(msg)
                 return 
+            
+            today = timezone.now().date()
 
-            standup = models.Standup.objects.filter(event__standup_type=stype, event__channel__discord_channel_id=ctx.channel.id, event__standup_type__publish_to_channel=True).order_by('-id').first()
+            standup = models.Standup.objects.filter(event__standup_type=stype, event__channel__discord_channel_id=ctx.channel.id, event__standup_type__publish_to_channel=True, standup_date__lt=today).order_by('-id').first()
 
             if standup:
                 await ctx.author.send('Sending summary for %s' % standup)
