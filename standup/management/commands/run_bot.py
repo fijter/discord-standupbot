@@ -61,7 +61,8 @@ class Command(BaseCommand):
                 await ctx.author.send(msg)
                 return 
 
-            standup = Standup.objects.filter(event__standup_type=stype, event__channel__discord_channel_id=ctx.channel.id, event__standup_type__publish_to_channel=True).order_by('-id').first()
+            standup = models.Standup.objects.filter(event__standup_type=stype, event__channel__discord_channel_id=ctx.channel.id, event__standup_type__publish_to_channel=True).order_by('-id').first()
+
             if standup:
                 await ctx.author.send('Sending summary for %s' % standup)
                 await standup.send_summary(bot)
