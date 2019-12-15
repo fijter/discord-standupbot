@@ -20,7 +20,7 @@ class StandupForm(forms.Form):
 
         for question in participation.standup.event.standup_type.questions.all():
             field_name = 'question_%d' % question.id
-            self.fields[field_name] = forms.CharField(required=False, label=question.question, widget=forms.Textarea())
+            self.fields[field_name] = forms.CharField(max_length=500, required=False, label=question.question, widget=forms.Textarea())
             if question.important:
                 self.fields[field_name].help_text = 'This field is optional, please leave it empty if it does not apply!'
 
