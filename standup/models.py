@@ -247,7 +247,7 @@ class Standup(models.Model):
         if timezone.now() < notify_date:
             return
 
-        msg = '** %s - %s **\n' % (standup.event.standup_type.name, standup.standup_date)
+        msg = '** %s **\n** %s **\n' % (standup.event.standup_type.name, standup.standup_date)
         if not standup.event.standup_type.private:
             msg = '%s\n%s' % (msg, standup.get_public_url())
 
@@ -266,23 +266,25 @@ class Standup(models.Model):
             if not parti.answers.exists():
                 continue
 
-            msg = '**<@%s>**:\n' % parti.user.discord_id
+            content = []
             for ans in parti.answers.all().order_by('question__order'):
                 if not ans.answer:
                     continue
+                    
+                content.append('# %s\n%s' % (ans.question.question, ans.answer))
 
-                msg = '%s\n**%s**:\n\n%s\n' % (msg, ans.question.question, ans.answer)
+            content = '\n\n'.join(content)
 
-            if len(msg) > 1950:
-                msg = '%s...\n\n' % msg[0:1950]
-            else:
-                msg = '%s\n\n' % msg
+            if len(content) > 1900:
+                content = '%s...' % content[0:1900]
+
+            msg = '<@%s>:\n```md\n%s```' % (parti.user.discord_id, content)
             
             await channel.send(msg)
         
         if standup.participants.inactive().exists():
             inactive = ', '.join(['<@%s>' % x.user.discord_id for x in standup.participants.inactive()])
-            msg = '**Not filled in (yet) by: ** %s' % (inactive,)
+            msg = 'Not filled in (yet) by: %s' % (inactive,)
             await channel.send(msg)
 
         await msg_obj.pin()
