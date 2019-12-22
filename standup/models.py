@@ -243,8 +243,8 @@ class Standup(models.Model):
             tzinfo=tz)
 
         notify_date = startdate + standup.event.standup_type.public_publish_after
-
-        if timezone.now() < notify_date:
+        
+        if timezone.now() < notify_date and standup.participants.inactive().exists():
             return
 
         msg = '** %s **\n** %s **\n' % (standup.event.standup_type.name, standup.standup_date)
