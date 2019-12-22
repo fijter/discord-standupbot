@@ -85,7 +85,7 @@ class StandupFormView(FormView):
     def get_form_kwargs(self):
         kwargs = super(StandupFormView, self).get_form_kwargs()
         try:
-            p = models.StandupParticipation.objects.get(single_use_token=self.kwargs.get('token'), completed=False)
+            p = models.StandupParticipation.objects.get(single_use_token=self.kwargs.get('token'))
         except models.StandupParticipation.DoesNotExist:
             raise Http404('Single use token not valid')
         kwargs['participation'] = p
