@@ -247,7 +247,7 @@ class Standup(models.Model):
         if timezone.now() < notify_date and standup.participants.inactive().exists():
             return
 
-        msg = '** %s **\n** %s **\n' % (standup.event.standup_type.name, standup.standup_date)
+        msg = '** %s **\n** %s **\n' % (standup.event.standup_type.name, standup.standup_date.strftime('%A %b %d, %Y'))
         if not standup.event.standup_type.private:
             msg = '%s\n%s' % (msg, standup.get_public_url())
 
