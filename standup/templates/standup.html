@@ -2,14 +2,14 @@
 {% block title %}{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}{% endblock %}
 {% block content %}
 <h1>{{standup.event.channel.server.name}} - #{{standup.event.channel.name}}</h1>
-<h2>{{standup.event.standup_type.name}} - {{standup.standup_date|date:"A M d\t\h, Y"}}</h2>
+<h2>{{standup.event.standup_type.name}} - {{standup.standup_date|date:"l M d\t\h, Y"}}</h2>
 
 <div class="row">
 {% if standup.event.standup_type.private %}
     {% with participation.previous_participation as prev %}
         {% if prev %}
             <div class="col-12 col-md-6">
-                <a href="{{prev.get_private_url}}">&laquo; to {{prev.standup.standup_date|date:"A M d\t\h, Y"}}</a>
+                <a href="{{prev.get_private_url}}">&laquo; to {{prev.standup.standup_date|date:"l M d\t\h, Y"}}</a>
             </div>
         {% endif %}
     {% endwith %}
@@ -17,21 +17,21 @@
     {% with participation.next_participation as next %}
         {% if next %}
             <div class="col-12 col-md-6">
-                <a href="{{next.get_private_url}}">to {{next.standup.standup_date|date:"A M d\t\h, Y"}} &raquo;</a>{% endif %}
+                <a href="{{next.get_private_url}}">to {{next.standup.standup_date|date:"l M d\t\h, Y"}} &raquo;</a>{% endif %}
             </div>
     {% endwith %}
 {% else %}
     {% with standup.previous_standup as prev %}
         {% if prev %}
             <div class="col-12 col-md-6">
-                <a href="{{prev.get_public_url}}">&laquo; to {{prev.standup_date|date:"A M d\t\h, Y"}}</a>
+                <a href="{{prev.get_public_url}}">&laquo; to {{prev.standup_date|date:"l M d\t\h, Y"}}</a>
             </div>
         {% endif %}
     {% endwith %}
     {% with standup.next_standup as next %}
         {% if next %}
             <div class="col-12 col-md-6">
-                <a href="{{next.get_public_url}}">to {{next.standup_date|date:"A M d\t\h, Y"}} &raquo;</a>
+                <a href="{{next.get_public_url}}">to {{next.standup_date|date:"l M d\t\h, Y"}} &raquo;</a>
             </div>
         {% endif %}
     {% endwith %}

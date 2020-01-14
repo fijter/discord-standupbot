@@ -18,7 +18,7 @@
             {% with participation.standup as standup %}
                 <p>
                     <a href="{{participation.get_private_url}}">#{{standup.event.channel.name}} - {{standup.event.standup_type.name}}</a><br>
-                    {{standup.standup_date|date:"A M d\t\h, Y"}} - {{standup.participants.active.count}} participants - {% if participation.completed %}&check;{% else %}&cross;{% endif %}
+                    {{standup.standup_date|date:"l M d\t\h, Y"}} - {{standup.participants.active.count}} participants - {% if participation.completed %}&check;{% else %}&cross;{% endif %}
                 </p>
             {% endwith %}
         {% endfor %}
