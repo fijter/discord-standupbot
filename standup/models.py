@@ -199,13 +199,15 @@ class StandupEvent(models.Model):
                 s.save()
             
             # Skip users that are already created / received a notification
-            if not s or StandupParticipation.objects.filter(standup=s, user=att.user).exists():
+            if not s or StandupParticipation.objects.filter(standup=s, user=att.user, notified=True).exists():
                 continue
 
-            if aware_dt.time() > self.standup_type.create_new_event_at:
-                p = StandupParticipation(standup=s, user=att.user, read_only=att.read_only)
-                p.save()
+            p, created = StandupParticipation.objects.get_or_create(standup=s, user=att.user, defaults={'read_only': att.read_only})
+
+            if aware_dt.time() > self.standup_type.create_new_event_at and not p.notified:
                 att_users.append(p)
+                p.notified = True
+                p.save()
 
         return (True, att_users)
 
@@ -327,6 +329,7 @@ class StandupParticipation(models.Model):
     read_only = models.BooleanField(default=False)
     single_use_token = models.CharField(max_length=255, blank=True, null=True)
     completed = models.BooleanField(default=False)
+    notified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = StandupParticipationManager()
