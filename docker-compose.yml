@@ -1,0 +1,20 @@
+version: "3.7"
+services:
+  db:
+    image: postgres
+    restart: always
+    env_file: .env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+  web:
+    build: .
+    #command: python manage.py runserver 0.0.0.0:8008
+    restart: always
+    env_file: .env
+    ports:
+      - "8008:8008"
+    depends_on:
+      - db
+
+volumes:
+  db-data:
