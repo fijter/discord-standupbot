@@ -29,6 +29,8 @@ ALLOWED_HOSTS = [os.getenv('DEFAULT_HOST', '127.0.0.1')]
 # Application definition
 
 INSTALLED_APPS = [
+    'multi_captcha_admin',
+    'snowpenguin.django.recaptcha2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +42,13 @@ INSTALLED_APPS = [
     'ordered_model',
     'standup',
 ]
+
+MULTI_CAPTCHA_ADMIN = {
+    'engine': 'recaptcha2',
+}
+
+RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC')
+RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE')
 
 SITE_ID = 1
 
