@@ -66,6 +66,7 @@ class StandupType(models.Model):
     create_on_friday = models.BooleanField(default=True)
     create_on_saturday = models.BooleanField(default=False)
     create_on_sunday = models.BooleanField(default=False)
+    minimum_days_between_standups = models.IntegerField(default=0)
     private = models.BooleanField(default=False, help_text='If enabled only participants of the standup can view the standup, the public URL will be disabled!')
     public_publish_after = models.DurationField(default=datetime.timedelta(hours=24))
     publish_to_channel = models.BooleanField(default=False, help_text="publish to the channel even if it's a private standup")
@@ -189,6 +190,13 @@ class StandupEvent(models.Model):
             # Don't create a participant if it's not a standup day
             if not self.standup_type.in_timeslot(aware_dt):
                 continue
+            
+            # Don't create a standup if the minimum days have not passed yet
+            if not s and self.standup_type.minimum_days_between_standups > 0:
+                treshold = aware_dt - datetime.timedelta(days=self.standup_type.minimum_days_between_standups)
+                if self.standups.filter(standup_date__gte=treshold.date()).exists():
+                    continue
+
 
             # Don't create a participant if muted
             if att.user.mute_until and att.user.mute_until >= aware_dt.date():
