@@ -30,7 +30,7 @@ requests==2.23.0
 six==1.12.0
 sqlparse==0.3.0
 traitlets==4.3.3
-urllib3==1.25.8
+urllib3==1.26.5
 wcwidth==0.1.7
 websockets==6.0
 yarl==1.3.0
