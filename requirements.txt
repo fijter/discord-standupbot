@@ -13,7 +13,7 @@ django-ordered-model==3.3.0
 django-recaptcha2==1.4.1
 django-timezone-field==3.1
 idna==2.8
-ipython==7.8.0
+ipython==7.16.3
 ipython-genutils==0.2.0
 jedi==0.15.1
 multidict==4.5.2
