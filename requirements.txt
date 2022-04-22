@@ -7,7 +7,7 @@ chardet==3.0.4
 decorator==4.4.0
 discord==1.0.1
 discord.py==1.2.5
-Django==2.2.6
+Django==2.2.28
 django-multi-captcha-admin==1.0.0
 django-ordered-model==3.3.0
 django-recaptcha2==1.4.1
